@@ -60,6 +60,10 @@ Contributing
 
 History
 -------
+2012-07-12
+
+* Added support for .simplecov (https://github.com/colszowka/simplecov#using-simplecov-for-centralized-config) [Closes #9, thanks Andrey Botalov]
+
 2012-07-02
 
 * Fixed improper handling of directories with non-ascii characters [Closes #5, thanks Andrew Dryga]
