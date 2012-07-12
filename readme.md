@@ -63,6 +63,8 @@ History
 2012-07-12
 
 * Added support for .simplecov (https://github.com/colszowka/simplecov#using-simplecov-for-centralized-config) [Closes #9, thanks Andrey Botalov]
+* Added Preferences menu [Closes #8, thanks Kirk Strauser]
+* Create a bare-bones user settings file if one doesn't exist
 
 2012-07-02
 
