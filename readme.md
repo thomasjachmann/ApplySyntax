@@ -60,6 +60,10 @@ Contributing
 
 History
 -------
+2012-08-07
+
+* Added rule to Ruby syntax for Puppet (pp) files.
+
 2012-07-12
 
 * Added support for .simplecov (https://github.com/colszowka/simplecov#using-simplecov-for-centralized-config) [Closes #9, thanks Andrey Botalov]
