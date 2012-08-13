@@ -60,6 +60,10 @@ Contributing
 
 History
 -------
+2012-08-13
+
+* User-defined syntax rules get processed first now. [Closes #11]
+
 2012-08-07
 
 * Added rule to Ruby syntax for Puppet (pp) files.
