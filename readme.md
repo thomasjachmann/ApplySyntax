@@ -60,6 +60,10 @@ Contributing
 
 History
 -------
+2012-09-01
+
+* Removed Puppet files from Ruby syntax. See https://github.com/phillipkoebbe/DetectSyntax/issues/11 for details.
+
 2012-08-13
 
 * User-defined syntax rules get processed first now. [Closes #11]
