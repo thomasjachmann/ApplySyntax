@@ -140,6 +140,7 @@
 			]
 		},
 		{
+			// This rule requires the INI plugin to be installed (via PackageControl or https://github.com/clintberry/sublime-text-2-ini)
 			"name": "INI",
 			"rules": [
 				{"file_name": ".*\\.(gitattributes|gitconfig|gitignore|npmrc)$"},
