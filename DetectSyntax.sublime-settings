@@ -150,7 +150,7 @@
 			"name": "ShellScript/Shell-Unix-Generic",
 			"rules": [
 				{"file_name": "profile"},
-				{"file_name": ".*\\.(bash_profile|bashrc)$"},
+				{"file_name": ".*\\.bash.*$"},
 				{"file_name": ".*\\.(bash|sh)$"},
 				{"binary": "bash"}
 			]
