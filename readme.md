@@ -63,6 +63,7 @@ History
 2012-09-01
 
 * Removed Puppet files from Ruby syntax. See https://github.com/phillipkoebbe/DetectSyntax/issues/11 for details.
+* Added some more files to YAML, PHP, XML, INI, and ShellScript. [Thanks Chris Jones]
 
 2012-08-13
 
