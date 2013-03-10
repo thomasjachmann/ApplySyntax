@@ -129,6 +129,21 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             # rules matched
             return False
 
+    def get_function(self, path_to_file, read_direct=False):
+        try:
+            if read_direct:
+                with open(path_to_file, 'r') as the_file:
+                    function_source = the_file.read()
+            else:
+                function_source = sublime.load_resource(path_to_file)
+        except:
+            if self.reraise_exceptions:
+                raise
+            else:
+                function_source = None
+
+        return function_source
+
     def function_matches(self, rule):
         function = rule.get("function")
         path_to_file = function.get("source")
@@ -139,31 +154,15 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
 
         # is path_to_file absolute?
         if not os.path.isabs(path_to_file):
-            user_file = self.user_dir + os.path.sep + path_to_file
-            plugin_file = self.plugin_dir + os.path.sep + path_to_file
+            if re.match(r"^Packages(?:\\|/)", path_to_file) is None:
+                path_to_file = self.plugin_dir + os.path.sep + path_to_file
+            function_source = self.get_function(path_to_file)
+        else:
+            function_source = self.get_function(path_to_file, read_direct=True)
 
-            # it's not absolute, so look in Packages/User
-            if os.path.exists(user_file):
-                path_to_file = user_file
-                # bubble exceptions up only if the user wants them
-                try:
-                    with open(path_to_file, 'r') as the_file:
-                        function_source = the_file.read()
-                except:
-                    if self.reraise_exceptions:
-                        raise
-                    else:
-                        return False
-            # now look in the plugin's directory
-            else:
-                # bubble exceptions up only if the user wants them
-                try:
-                    function_source = sublime.load_resource(plugin_file)
-                except:
-                    if self.reraise_exceptions:
-                        raise
-                    else:
-                        return False
+        if function_source is None:
+            # can't find it ... nothing more to do
+            return False
 
         try:
             exec(function_source)
