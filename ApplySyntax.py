@@ -3,8 +3,6 @@ import sublime_plugin
 import os
 import re
 
-plugin_directory = os.getcwdu()
-
 
 class ApplySyntaxCommand(sublime_plugin.EventListener):
     def __init__(self):
@@ -14,7 +12,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         self.view = None
         self.syntaxes = []
         self.plugin_name = 'ApplySyntax'
-        self.plugin_dir = plugin_directory
+        self.plugin_dir = "Packages/%s" % self.plugin_name
         self.user_dir = sublime.packages_path() + os.path.sep + 'User'
         self.settings_file = self.plugin_name + '.sublime-settings'
         self.reraise_exceptions = False
@@ -75,18 +73,18 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
 
         file_name = name + '.tmLanguage'
         new_syntax = 'Packages/' + path + '/' + file_name
-        new_syntax_path = os.path.sep.join([sublime.packages_path(), path, file_name])
 
         current_syntax = self.view.settings().get('syntax')
 
         # only set the syntax if it's different
         if new_syntax != current_syntax:
             # let's make sure it exists first!
-            if os.path.exists(new_syntax_path):
+            try:
+                sublime.load_resource(new_syntax)
                 self.view.set_syntax_file(new_syntax)
-                print 'Syntax set to ' + name + ' using ' + new_syntax_path
-            else:
-                print 'Syntax file for ' + name + ' does not exist at ' + new_syntax_path
+                print('Syntax set to ' + name + ' using ' + new_syntax)
+            except:
+                print('Syntax file for ' + name + ' does not exist at ' + new_syntax)
 
     def load_syntaxes(self):
         settings = sublime.load_settings(self.plugin_name + '.sublime-settings')
@@ -147,22 +145,25 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             # it's not absolute, so look in Packages/User
             if os.path.exists(user_file):
                 path_to_file = user_file
+                # bubble exceptions up only if the user wants them
+                try:
+                    with open(path_to_file, 'r') as the_file:
+                        function_source = the_file.read()
+                except:
+                    if self.reraise_exceptions:
+                        raise
+                    else:
+                        return False
             # now look in the plugin's directory
-            elif os.path.exists(plugin_file):
-                path_to_file = plugin_file
             else:
-                # can't find it ... nothing more to do
-                return False
-
-        # bubble exceptions up only if the user wants them
-        try:
-            with open(path_to_file, 'r') as the_file:
-                function_source = the_file.read()
-        except:
-            if self.reraise_exceptions:
-                raise
-            else:
-                return False
+                # bubble exceptions up only if the user wants them
+                try:
+                    function_source = sublime.load_resource(plugin_file)
+                except:
+                    if self.reraise_exceptions:
+                        raise
+                    else:
+                        return False
 
         try:
             exec(function_source)
