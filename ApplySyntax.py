@@ -1,7 +1,10 @@
-import sublime, sublime_plugin
-import os, string, re
+import sublime
+import sublime_plugin
+import os
+import re
 
 plugin_directory = os.getcwdu()
+
 
 class ApplySyntaxCommand(sublime_plugin.EventListener):
     def __init__(self):
@@ -32,7 +35,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         self.detect_syntax(view)
 
     def detect_syntax(self, view):
-        if view.is_scratch() or not view.file_name: # buffer has never been saved
+        if view.is_scratch() or not view.file_name:  # buffer has never been saved
             return
 
         self.reset_cache_variables(view)
@@ -191,7 +194,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             return False
 
         if regexp and subject:
-            return re.match(regexp, subject) != None
+            return re.match(regexp, subject) is not None
         else:
             return False
 
