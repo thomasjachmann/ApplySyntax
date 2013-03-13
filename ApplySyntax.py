@@ -4,22 +4,26 @@ import os
 import re
 
 
+def sublime_format_path(pth):
+    if sublime.platform() == "windows" and re.match(r"(^[A-Za-z]{1}:(?:/|\\))", pth) != None:
+        pth = "/" + pth
+    return pth.replace("\\", "/")
+
+
 class ApplySyntaxCommand(sublime_plugin.EventListener):
     def __init__(self):
-        super(ApplySyntaxCommand, self).__init__()
+        # super(ApplySyntaxCommand, self).__init__()
         self.first_line = None
         self.file_name = None
         self.view = None
         self.syntaxes = []
         self.plugin_name = 'ApplySyntax'
         self.plugin_dir = "Packages/%s" % self.plugin_name
-        self.user_dir = sublime.packages_path() + os.path.sep + 'User'
         self.settings_file = self.plugin_name + '.sublime-settings'
         self.reraise_exceptions = False
 
-        self.ensure_user_settings()
-
     def on_new(self, view):
+        self.ensure_user_settings()
         settings = sublime.load_settings(self.settings_file)
         name = settings.get("new_file_syntax")
         if name:
@@ -72,7 +76,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             path = name
 
         file_name = name + '.tmLanguage'
-        new_syntax = 'Packages/' + path + '/' + file_name
+        new_syntax = sublime_format_path('Packages/' + path + '/' + file_name)
 
         current_syntax = self.view.settings().get('syntax')
 
@@ -87,6 +91,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
                 print('Syntax file for ' + name + ' does not exist at ' + new_syntax)
 
     def load_syntaxes(self):
+        self.ensure_user_settings()
         settings = sublime.load_settings(self.plugin_name + '.sublime-settings')
         self.reraise_exceptions = settings.get("reraise_exceptions")
         # load the default syntaxes
@@ -199,7 +204,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             return False
 
     def ensure_user_settings(self):
-        user_settings_file = self.user_dir + os.path.sep + self.settings_file
+        user_settings_file = sublime.packages_path() + os.path.sep + 'User' + os.path.sep + self.settings_file
         if os.path.exists(user_settings_file):
             return
 
