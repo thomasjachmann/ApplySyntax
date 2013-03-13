@@ -65,12 +65,9 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         # is using rules that were written on windows, the same thing will happen. So let's
         # be intelligent about this and replace / and \ with os.path.sep to get to
         # a reasonable starting point
-        name = name.replace('/', os.path.sep)
-        name = name.replace('\\', os.path.sep)
 
-        dirs = name.split(os.path.sep)
-        name = dirs.pop()
-        path = os.path.sep.join(dirs)
+        path = os.path.dirname(name)
+        name = os.path.basename(name)
 
         if not path:
             path = name
