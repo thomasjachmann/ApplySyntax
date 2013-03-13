@@ -175,7 +175,10 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
                 return False
 
         try:
-            return eval(function_name + '(\'' + self.file_name + '\')')
+            var_file_name = self.file_name
+            if sublime.platform() == "windows":
+                var_file_name = var_file_name.replace('\\', '\\\\')
+            return eval("%s('%s')" % (function_name, var_file_name))
         except:
             if self.reraise_exceptions:
                 raise
