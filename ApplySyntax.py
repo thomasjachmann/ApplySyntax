@@ -3,6 +3,23 @@ import sublime_plugin
 import os
 import re
 
+DEFAULT_SETTINGS = \
+'''
+{
+    // If you want exceptions reraised so you can see them in the console, change this to true.
+    "reraise_exceptions": false,
+
+    // If you want to have a syntax applied when new files are created, set new_file_syntax to the name of the syntax to use.
+    // The format is exactly the same as "name" in the rules below. For example, if you want to have a new file use
+    // JavaScript syntax, set new_file_syntax to 'JavaScript'.
+    "new_file_syntax": false,
+
+    // Put your custom syntax rules here:
+    "syntaxes": [
+    ]
+}
+'''
+
 
 def sublime_format_path(pth):
     if sublime.platform() == "windows" and re.match(r"(^[A-Za-z]{1}:(?:/|\\))", pth) != None:
@@ -10,9 +27,17 @@ def sublime_format_path(pth):
     return pth.replace("\\", "/")
 
 
+def log(msg):
+    print("ApplySyntax: %s" % msg)
+
+
+def debug(msg):
+    if bool(sublime.load_settings('ApplySyntax.sublime-settings').get("debug_enabled", False)):
+        log(msg)
+
+
 class ApplySyntaxCommand(sublime_plugin.EventListener):
     def __init__(self):
-        # super(ApplySyntaxCommand, self).__init__()
         self.first_line = None
         self.file_name = None
         self.view = None
@@ -73,7 +98,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             path = name
 
         file_name = name + '.tmLanguage'
-        new_syntax = sublime_format_path('Packages/' + path + '/' + file_name)
+        new_syntax = sublime_format_path('/'.join(['Packages', path, file_name]))
 
         current_syntax = self.view.settings().get('syntax')
 
@@ -83,13 +108,13 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             try:
                 sublime.load_resource(new_syntax)
                 self.view.set_syntax_file(new_syntax)
-                print('Syntax set to ' + name + ' using ' + new_syntax)
+                log('Syntax set to ' + name + ' using ' + new_syntax)
             except:
-                print('Syntax file for ' + name + ' does not exist at ' + new_syntax)
+                log('Syntax file for ' + name + ' does not exist at ' + new_syntax)
 
     def load_syntaxes(self):
         self.ensure_user_settings()
-        settings = sublime.load_settings(self.plugin_name + '.sublime-settings')
+        settings = sublime.load_settings(self.settings_file)
         self.reraise_exceptions = settings.get("reraise_exceptions")
         # load the default syntaxes
         default_syntaxes = settings.get("default_syntaxes")
@@ -157,7 +182,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         # is path_to_file absolute?
         if not os.path.isabs(path_to_file):
             if re.match(r"^Packages(?:\\|/)", path_to_file) is None:
-                path_to_file = self.plugin_dir + os.path.sep + path_to_file
+                path_to_file = os.path.join(self.plugin_dir, path_to_file)
             function_source = self.get_function(path_to_file)
         else:
             function_source = self.get_function(path_to_file, read_direct=True)
@@ -204,27 +229,10 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             return False
 
     def ensure_user_settings(self):
-        user_settings_file = sublime.packages_path() + os.path.sep + 'User' + os.path.sep + self.settings_file
+        user_settings_file = os.path.join(sublime.packages_path(), 'User', self.settings_file)
         if os.path.exists(user_settings_file):
             return
 
         # file doesn't exist, let's create a bare one
-        output = """
-{
-    // If you want exceptions reraised so you can see them in the console, change this to true.
-    "reraise_exceptions": false,
-
-    // If you want to have a syntax applied when new files are created, set new_file_syntax to the name of the syntax to use.
-    // The format is exactly the same as "name" in the rules below. For example, if you want to have a new file use
-    // JavaScript syntax, set new_file_syntax to 'JavaScript'.
-    "new_file_syntax": false,
-
-    // Put your custom syntax rules here:
-    "syntaxes": [
-    ]
-}
-"""
-
-        file = open(user_settings_file, 'w')
-        file.write(output)
-        file.close
+        with open(user_settings_file, 'w') as f:
+            f.write(DEFAULT_SETTINGS)
