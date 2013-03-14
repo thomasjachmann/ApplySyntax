@@ -2,6 +2,8 @@ import sublime
 import sublime_plugin
 import os
 import re
+import imp
+import sys
 
 DEFAULT_SETTINGS = \
 '''
@@ -156,20 +158,22 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             # rules matched
             return False
 
-    def get_function(self, path_to_file, read_direct=False):
+    def get_function(self, path_to_file, function_name):
         try:
-            if read_direct:
-                with open(path_to_file, 'r') as the_file:
-                    function_source = the_file.read()
-            else:
-                function_source = sublime.load_resource(path_to_file)
+            path_name = sublime_format_path(path_to_file)
+            module_name = os.path.splitext(path_name)[0].replace('/', '.')
+            module = imp.new_module(module_name)
+            sys.modules[module_name] = module
+            exec(compile(sublime.load_resource(path_name), module_name, 'exec'), sys.modules[module_name].__dict__)
+            function_source = sublime.load_resource(path_to_file)
+            function = getattr(module, function_name)
         except:
             if self.reraise_exceptions:
                 raise
             else:
-                function_source = None
+                function = None
 
-        return function_source
+        return function
 
     def function_matches(self, rule):
         function = rule.get("function")
@@ -179,31 +183,16 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         if not path_to_file:
             path_to_file = function_name + '.py'
 
-        # is path_to_file absolute?
-        if not os.path.isabs(path_to_file):
-            if re.match(r"^Packages(?:\\|/)", path_to_file) is None:
-                path_to_file = os.path.join(self.plugin_dir, path_to_file)
-            function_source = self.get_function(path_to_file)
-        else:
-            function_source = self.get_function(path_to_file, read_direct=True)
+        if re.match(r"^Packages(?:\\|/)", path_to_file) is None:
+            path_to_file = os.path.join(self.plugin_dir, path_to_file)
+        function = self.get_function(path_to_file, function_name)
 
-        if function_source is None:
+        if function is None:
             # can't find it ... nothing more to do
             return False
 
         try:
-            exec(function_source)
-        except:
-            if self.reraise_exceptions:
-                raise
-            else:
-                return False
-
-        try:
-            var_file_name = self.file_name
-            if sublime.platform() == "windows":
-                var_file_name = var_file_name.replace('\\', '\\\\')
-            return eval("%s('%s')" % (function_name, var_file_name))
+            return function(self.file_name)
         except:
             if self.reraise_exceptions:
                 raise

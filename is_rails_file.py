@@ -1,8 +1,8 @@
-def is_rails_file(file_name):
-    import os
-    import re
-    import platform
+import os
+import re
+import platform
 
+def is_rails_file(file_name):
     windows = platform.system() == "Windows"
 
     path = os.path.dirname(file_name)
