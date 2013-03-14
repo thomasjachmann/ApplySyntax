@@ -18,10 +18,14 @@ def is_rails_file(file_name):
     # but it does work. The idea here is to work up the tree, checking at each level for
     # the existence of config/routes.rb. If it's found, the assumption is made that it's
     # a Rails app.
-    while path != '' and (not windows or re.match(r"^[A-Za-z]{1}:\\$", path) is None):
-        if os.path.exists(os.path.join(path,'config','routes.rb')):
+    while path != '':
+        if os.path.exists(os.path.join(path, 'config', 'routes.rb')):
             result = True
             break
+        elif windows and re.match(r"^[A-Za-z]{1}:\\$", path) is not None:
+            path = ''
+        elif not windows and path == '/':
+            path = ''
         else:
             path = os.path.dirname(path)
 
