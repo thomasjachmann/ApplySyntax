@@ -24,8 +24,9 @@ DEFAULT_SETTINGS = \
 
 
 def sublime_format_path(pth):
-    if sublime.platform() == "windows" and re.match(r"(^[A-Za-z]{1}:(?:/|\\))", pth) != None:
-        pth = "/" + pth
+    m = re.match(r"^([A-Za-z]{1}):(?:/|\\)(.*)", pth)
+    if sublime.platform() == "windows" and m != None:
+        pth = m.group(1) + "/" + m.group(2)
     return pth.replace("\\", "/")
 
 
@@ -161,11 +162,10 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
     def get_function(self, path_to_file, function_name):
         try:
             path_name = sublime_format_path(path_to_file)
-            module_name = os.path.splitext(path_name)[0].replace('/', '.')
+            module_name = os.path.splitext(path_name)[0].replace('/', '.').replace('Packages/', '', 1)
             module = imp.new_module(module_name)
             sys.modules[module_name] = module
             exec(compile(sublime.load_resource(path_name), module_name, 'exec'), sys.modules[module_name].__dict__)
-            function_source = sublime.load_resource(path_to_file)
             function = getattr(module, function_name)
         except:
             if self.reraise_exceptions:
