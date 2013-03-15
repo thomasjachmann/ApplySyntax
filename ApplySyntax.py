@@ -169,10 +169,11 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
                 warnings.simplefilter("always")
                 module = imp.new_module(module_name)
                 w = filter(lambda i: issubclass(i.category, UserWarning), w)
-            sys.modules[module_name] = module
-            with open(path_to_file, "r") as f:
-                source = f.read()
-            exec(compile(source, module_name, 'exec'), sys.modules[module_name].__dict__)
+                sys.modules[module_name] = module
+                with open(path_to_file, "r") as f:
+                    source = f.read()
+                self.execute_function(source, module_name)
+
             function = getattr(module, function_name)
         except:
             if self.reraise_exceptions:
@@ -181,6 +182,9 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
                 function = None
 
         return function
+
+    def execute_function(self, source, module_name):
+        exec(compile(source, module_name, 'exec'), sys.modules[module_name].__dict__)
 
     def function_matches(self, rule):
         function = rule.get("function")
