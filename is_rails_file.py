@@ -1,11 +1,9 @@
+import os
+import re
+import platform
+
 def is_rails_file(file_name):
-    try:
-        # check to see if os.path has already been imported
-        # this just needs to be something simple that will
-        # raise an exception if it fails
-        os.path.supports_unicode_filenames
-    except Exception:
-        import os.path
+    windows = platform.system() == "Windows"
 
     path = os.path.dirname(file_name)
     file_name = os.path.basename(file_name).lower()
@@ -21,12 +19,14 @@ def is_rails_file(file_name):
     # the existence of config/routes.rb. If it's found, the assumption is made that it's
     # a Rails app.
     while path != '':
-        if os.path.exists(path + '/config/routes.rb'):
+        if os.path.exists(os.path.join(path, 'config', 'routes.rb')):
             result = True
             break
+        elif windows and re.match(r"^[A-Za-z]{1}:\\$", path) is not None:
+            path = ''
+        elif not windows and path == '/':
+            path = ''
         else:
-            dirs = path.split('/')
-            dirs.pop()
-            path = '/'.join(dirs)
+            path = os.path.dirname(path)
 
     return extension in ['.rb', '.rake'] and result
