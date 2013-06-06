@@ -197,7 +197,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         if re.match(r"^Packages(?:\\|/)", path_to_file) is None:
             path_to_file = os.path.join(self.plugin_dir, path_to_file)
         else:
-            path_to_file = os.path.join(os.path.dirname(sublime.packages_path), path_to_file)
+            path_to_file = os.path.join(os.path.dirname(sublime.packages_path()), path_to_file)
         function = self.get_function(path_to_file, function_name)
 
         if function is None:
