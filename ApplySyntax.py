@@ -92,7 +92,7 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         self.syntaxes = []
         self.reraise_exceptions = False
 
-    def set_syntax(self, name):
+    def set_syntax(self, name, hidden = False):
         # the default settings file uses / to separate the syntax name parts, but if the user
         # is on windows, that might not work right. And if the user happens to be on Mac/Linux but
         # is using rules that were written on windows, the same thing will happen. So let's
@@ -110,7 +110,8 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
             if not path:
                 path = name
 
-            file_name = name + '.tmLanguage'
+            extension = '.hidden-tmLanguage' if hidden else '.tmLanguage'
+            file_name = name + extension
             new_syntax = sublime_format_path('/'.join(['Packages', path, file_name]))
 
             current_syntax = self.view.settings().get('syntax')
@@ -125,6 +126,8 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
                     break
                 except:
                     log('Syntax file for ' + name + ' does not exist at ' + new_syntax)
+                    if not hidden:
+                        self.set_syntax(path + '/' + name, True)
             else:
                 break
 
