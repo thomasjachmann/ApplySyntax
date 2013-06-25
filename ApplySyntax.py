@@ -73,6 +73,10 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         self.reset_cache_variables(view)
         self.load_syntaxes()
 
+        # don't apply detection to the settings file (avoids collision with contains rules)
+        if os.path.basename(self.file_name).strip() == self.settings_file:
+            return
+
         if not self.syntaxes:
             return
 

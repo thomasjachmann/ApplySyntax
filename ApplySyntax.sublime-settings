@@ -140,7 +140,7 @@
 		// 	// we switch its syntax highlighting to Handlebars.
 		// 	//
 		// 	// NOTE: Make sure to always pair this rule with one for the extension or the file or other
-		// 	// characteristics, otherwise you'll end up matching the settings file too (it contains the string)
+		// 	// characteristics, otherwise you might have unwanted matches if it's too broad
 		// 	"name": "Handlebars",
 		// 	"match": "all",
 		// 	"rules": [
