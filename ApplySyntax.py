@@ -52,10 +52,15 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         self.settings_file = self.plugin_name + '.sublime-settings'
         self.reraise_exceptions = False
 
+    def get_setting(self, name, default = None):
+        plugin_settings = sublime.load_settings(self.settings_file)
+        active_settings = self.view.settings() if self.view else {}
+
+        return active_settings.get(name, plugin_settings.get(name, default))
+
     def on_new(self, view):
         self.ensure_user_settings()
-        settings = sublime.load_settings(self.settings_file)
-        name = settings.get("new_file_syntax")
+        name = self.get_setting("new_file_syntax")
         if name:
             self.view = view
             self.set_syntax(name)
@@ -129,15 +134,13 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         settings = sublime.load_settings(self.settings_file)
         self.reraise_exceptions = settings.get("reraise_exceptions")
         # load the default syntaxes
-        default_syntaxes = settings.get("default_syntaxes")
-        if default_syntaxes is None:
-            default_syntaxes = []
+        default_syntaxes = self.get_setting("default_syntaxes", [])
         # load any user-defined syntaxes
-        user_syntaxes = settings.get("syntaxes")
-        if user_syntaxes is None:
-            user_syntaxes = []
+        user_syntaxes = self.get_setting("syntaxes", [])
+        # load any project-defined syntaxes
+        project_syntaxes = self.get_setting("project_syntaxes", [])
 
-        self.syntaxes = user_syntaxes + default_syntaxes
+        self.syntaxes = project_syntaxes + user_syntaxes + default_syntaxes
 
     def syntax_matches(self, syntax):
         rules = syntax.get("rules")
