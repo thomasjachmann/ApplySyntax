@@ -108,26 +108,34 @@ class ApplySyntaxCommand(sublime_plugin.EventListener):
         # be intelligent about this and replace / and \ with os.path.sep to get to
         # a reasonable starting point
 
-        path = os.path.dirname(name)
-        name = os.path.basename(name)
+        if not isinstance(name, list):
+            names = [name]
+        else:
+            names = name
+        for n in names:
+            path = os.path.dirname(n)
+            name = os.path.basename(n)
 
-        if not path:
-            path = name
+            if not path:
+                path = name
 
-        file_name = name + '.tmLanguage'
-        new_syntax = sublime_format_path(os.path.join("Packages", path, file_name))
-        file_path = os.path.join(sublime.packages_path(), path, file_name)
+            file_name = name + '.tmLanguage'
+            new_syntax = sublime_format_path(os.path.join("Packages", path, file_name))
+            file_path = os.path.join(sublime.packages_path(), path, file_name)
 
-        current_syntax = self.view.settings().get('syntax')
+            current_syntax = self.view.settings().get('syntax')
 
-        # only set the syntax if it's different
-        if new_syntax != current_syntax:
-            # let's make sure it exists first!
-            if os.path.exists(file_path):
-                self.view.set_syntax_file(new_syntax)
-                log('Syntax set to ' + name + ' using ' + new_syntax)
+            # only set the syntax if it's different
+            if new_syntax != current_syntax:
+                # let's make sure it exists first!
+                if os.path.exists(file_path):
+                    self.view.set_syntax_file(new_syntax)
+                    log('Syntax set to ' + name + ' using ' + new_syntax)
+                    break
+                else:
+                    log('Syntax file for ' + name + ' does not exist at ' + new_syntax)
             else:
-                log('Syntax file for ' + name + ' does not exist at ' + new_syntax)
+                break
 
     def load_syntaxes(self):
         self.ensure_user_settings()
