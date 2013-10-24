@@ -153,6 +153,13 @@
         // 	]
         // },
         {
+            // Emblem syntax matches Ruby Slim
+            "name": "Ruby Slim/Syntaxes/Ruby Slim",
+            "rules": [
+                {"file_name": ".*\\.emblem$"}
+          ]
+        },
+        {
             "name": "Blade",
             "rules": [
                 {"file_name": ".*\\.blade.php$"}
